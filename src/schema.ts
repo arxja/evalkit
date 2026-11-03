@@ -28,3 +28,18 @@ export interface RunRecord {
   rubricHash: string | null;
   cases: CaseResult[];
 }
+
+export const VerdictSchema = z.object({
+  verdict: z.enum(["pass", "fail"]),
+  reason: z.string(),
+});
+
+export type Verdict = z.infer<typeof VerdictSchema>;
+
+export type Scorer = "exact" | "contains" | "judge";
+
+export const LabeledCaseSchema = GoldenCaseSchema.extend({
+  actual: z.string(),
+  human_verdict: z.enum(["pass", "fail"]),
+});
+export type LabeledCase = z.infer<typeof LabeledCaseSchema>;
