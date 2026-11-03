@@ -1,5 +1,5 @@
 import { Database } from "bun:sqlite";
-import type { RunRecord, CaseResult } from "./schema";
+import type { RunRecord, CaseResult, Verdict } from "./schema";
 
 export function openDb(path: string): Database {
   const db = new Database(path, { create: true });
@@ -30,6 +30,14 @@ export function openDb(path: string): Database {
       tags TEXT NOT NULL,
       passed INTEGER NOT NULL,
       reason TEXT NOT NULL
+    );
+  `);
+  db.run(`
+    CREATE TABLE IF NOT EXISTS judge_cache (
+      key TEXT PRIMARY KEY,
+      verdict TEXT NOT NULL,
+      reason TEXT NOT NULL,
+      created_at TEXT NOT NULL
     );
   `);
   return db;
@@ -143,4 +151,17 @@ export function getRun(db: Database, id: number): RunRecord | null {
       }),
     ),
   };
+}
+
+export function getJudgeCache(db: Database, key: string): Verdict | null {
+  return db
+    .query(`SELECT verdict, reason FROM judge_cache WHERE key = ?`)
+    .get(key) as Verdict | null;
+}
+
+export function setJudgeCache(db: Database, key: string, v: Verdict): void {
+  db.prepare(
+    `INSERT OR REPLACE INTO judge_cache (key, verdict, reason, created_at)
+     VALUES (?, ?, ?, ?)`,
+  ).run(key, v.verdict, v.reason, new Date().toISOString());
 }

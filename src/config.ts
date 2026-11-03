@@ -30,3 +30,8 @@ export async function gitDirty(): Promise<boolean> {
     return false;
   }
 }
+
+export const JUDGE_BASE_URL =
+  process.env.JUDGE_BASE_URL ?? "https://api.openai.com/v1";
+export const JUDGE_API_KEY = process.env.JUDGE_API_KEY ?? "";
+export const JUDGE_MODEL = process.env.JUDGE_MODEL ?? "gpt-4o-mini";
