@@ -1,8 +1,16 @@
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { GoldenCaseSchema, type CaseResult, type GoldenCase } from "./schema";
+import {
+  GoldenCaseSchema,
+  type CaseResult,
+  type GoldenCase,
+  type RunRecord,
+} from "./schema";
 import type { ScorerFn } from "./scorers/types";
 import { exact } from "./scorers/exact";
+import { sha256, gitSha, gitDirty } from "./config";
+import { saveRun } from "./store";
+import type { Database } from "bun:sqlite";
 
 export type Target = (input: string) => Promise<string>;
 
@@ -33,11 +41,11 @@ export async function loadTarget(p: string): Promise<Target> {
 }
 
 export interface RunOptions {
+  db: Database;
   evalsetPath: string;
   targetPath: string;
 }
-
-export async function run(opts: RunOptions): Promise<CaseResult[]> {
+export async function run(opts: RunOptions): Promise<RunRecord> {
   const cases = await loadEvalset(opts.evalsetPath);
   const target = await loadTarget(opts.targetPath);
   const scorer: ScorerFn = exact;
@@ -66,5 +74,17 @@ export async function run(opts: RunOptions): Promise<CaseResult[]> {
       reason: score.reason,
     });
   }
-  return results;
+  const record: RunRecord = {
+    timestamp: new Date().toISOString(),
+    gitSha: await gitSha(),
+    gitDirty: await gitDirty(),
+    evalsetHash: sha256(JSON.stringify(cases)),
+    scorer: "exact",
+    judgeModel: null,
+    rubricHash: null,
+    cases: results,
+  };
+
+  const id = saveRun(opts.db, record);
+  return { ...record, id };
 }

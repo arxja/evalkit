@@ -4,7 +4,8 @@ const answers: Record<string, string> = {
   "What's the max file size?": "5 GB per file",
   "Do you support SSO?": "Yes, on the Enterprise plan",
   // Wrong on purpose
-  "Can I cancel after 30 days?": "Yes, you can cancel anytime",
+  // "Can I cancel after 30 days?": "Yes, you can cancel anytime",
+  "Can I cancel after 30 days?": "No, but you can downgrade",
   // Missing on purpose — will fall through to the throw below
 };
 
