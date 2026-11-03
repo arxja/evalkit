@@ -132,7 +132,14 @@ async function main() {
     return;
   }
 
-  console.error("usage: evalkit <run|compare|list> [args]");
+  if (cmd === "report") {
+    const { exportDashboard } = await import("./report/html");
+    const outPath = await exportDashboard(db, "dashboard");
+    console.log(`wrote ${outPath}  — open it in a browser`);
+    return;
+  }
+
+  console.error("usage: evalkit <run|compare|list|agreement|report> [args]");
   process.exit(1);
 }
 

@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>evalkit</title>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"
+    ></script>
+    <style>
+      body {
+        font:
+          14px/1.5 -apple-system,
+          system-ui,
+          sans-serif;
+        margin: 0;
+        padding: 24px;
+        background: #0b0d10;
+        color: #e6e8eb;
+      }
+      h1 {
+        font-size: 18px;
+        margin: 0 0 16px;
+      }
+      .muted {
+        color: #8b949e;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 8px 10px;
+        border-bottom: 1px solid #1d2228;
+        font-size: 13px;
+        vertical-align: top;
+      }
+      th {
+        color: #8b949e;
+        font-weight: 500;
+      }
+      tr.run:hover {
+        background: #13181d;
+        cursor: pointer;
+      }
+      tr.selected {
+        background: #17202a;
+      }
+      .pill {
+        display: inline-block;
+        padding: 1px 7px;
+        border-radius: 9px;
+        font-size: 11px;
+        background: #1d2228;
+        margin-right: 4px;
+      }
+      .pass {
+        color: #3fb950;
+      }
+      .fail {
+        color: #f85149;
+      }
+      .bar {
+        height: 5px;
+        background: #1d2228;
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .bar > div {
+        height: 100%;
+        background: #3fb950;
+      }
+      .case-row {
+        background: #0f1419;
+      }
+      pre {
+        margin: 4px 0 8px;
+        padding: 8px;
+        background: #06090c;
+        border-radius: 4px;
+        overflow: auto;
+        font-size: 12px;
+        white-space: pre-wrap;
+      }
+      details summary {
+        cursor: pointer;
+        color: #8b949e;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .card {
+        background: #0f1419;
+        border-radius: 6px;
+        padding: 12px;
+      }
+    </style>
+  </head>
+  <body x-data="app()">
+    <h1>evalkit</h1>
+
+    <template x-if="runs.length === 0">
+      <p class="muted">No runs yet.</p>
+    </template>
+
+    <template x-if="runs.length > 0">
+      <div>
+        <div class="muted" style="margin-bottom: 12px">
+          <span x-text="runs.length"></span> runs · click a row to inspect
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>When</th>
+              <th>Scorer</th>
+              <th>Pass</th>
+              <th>Progress</th>
+              <th>Tags</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="r in runs" :key="r.id">
+              <tr
+                class="run"
+                :class="selected === r.id && 'selected'"
+                @click="selected = selected === r.id ? null : r.id"
+              >
+                <td x-text="r.id"></td>
+                <td>
+                  <div x-text="new Date(r.timestamp).toLocaleString()"></div>
+                  <div class="muted" style="font-size: 11px">
+                    <span
+                      x-text="r.gitSha ? r.gitSha.slice(0,7) : 'no-git'"
+                    ></span>
+                    <span x-show="r.gitDirty" class="fail"> · dirty</span>
+                  </div>
+                </td>
+                <td>
+                  <span x-text="r.scorer"></span>
+                  <div
+                    class="muted"
+                    style="font-size: 11px"
+                    x-text="r.judgeModel ?? ''"
+                  ></div>
+                </td>
+                <td>
+                  <span :class="r.passed === r.total ? 'pass' : 'fail'">
+                    <span x-text="r.passed"></span>/<span
+                      x-text="r.total"
+                    ></span>
+                  </span>
+                </td>
+                <td style="min-width: 140px">
+                  <div class="bar">
+                    <div
+                      :style="`width:${r.total ? (100*r.passed/r.total) : 0}%`"
+                    ></div>
+                  </div>
+                </td>
+                <td>
+                  <template x-for="t in r.tags" :key="t.tag">
+                    <span
+                      class="pill"
+                      :class="t.pass === t.total ? 'pass' : 'fail'"
+                    >
+                      <span x-text="t.tag"></span>
+                      <span x-text="`${t.pass}/${t.total}`"></span>
+                    </span>
+                  </template>
+                </td>
+              </tr>
+              <template x-if="selected === r.id">
+                <tr class="case-row">
+                  <td colspan="6">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Case</th>
+                          <th>Tags</th>
+                          <th>Result</th>
+                          <th>Reason / details</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <template x-for="c in r.cases" :key="c.id">
+                          <tr>
+                            <td style="min-width: 180px">
+                              <div x-text="c.id"></div>
+                              <details>
+                                <summary>input</summary>
+                                <pre x-text="c.input"></pre>
+                              </details>
+                            </td>
+                            <td>
+                              <template x-for="t in c.tags" :key="t">
+                                <span class="pill" x-text="t"></span>
+                              </template>
+                            </td>
+                            <td>
+                              <span
+                                :class="c.passed ? 'pass' : 'fail'"
+                                x-text="c.passed ? 'PASS' : 'FAIL'"
+                              ></span>
+                            </td>
+                            <td>
+                              <div
+                                style="font-size: 12px"
+                                x-text="c.reason"
+                              ></div>
+                              <details>
+                                <summary>expected / actual</summary>
+                                <div class="grid">
+                                  <div class="card">
+                                    <div class="muted" style="font-size: 11px">
+                                      expected
+                                    </div>
+                                    <pre x-text="c.expected"></pre>
+                                  </div>
+                                  <div class="card">
+                                    <div class="muted" style="font-size: 11px">
+                                      actual
+                                    </div>
+                                    <pre x-text="c.actual"></pre>
+                                  </div>
+                                </div>
+                              </details>
+                            </td>
+                          </tr>
+                        </template>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </template>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </template>
+
+    <script>
+      const RUNS = __RUNS_JSON__;
+      function app() {
+        return { runs: RUNS, selected: RUNS.length ? RUNS[0].id : null };
+      }
+    </script>
+  </body>
+</html>
