@@ -1,0 +1,6 @@
+{"id":"q-001","input":"What is the refund policy?","expected":"30 days, no questions asked","tags":["policy","easy"]}
+{"id":"q-002","input":"Can I cancel after 30 days?","expected":"No, but you can downgrade","tags":["policy","edge"]}
+{"id":"q-003","input":"How do I reset my password?","expected":"Click 'Forgot password' on the login page","tags":["account","easy"]}
+{"id":"q-004","input":"What's the max file size?","expected":"5 GB per file","tags":["limits","easy"]}
+{"id":"q-005","input":"Do you support SSO?","expected":"Yes, on the Enterprise plan","tags":["enterprise","policy"]}
+{"id":"q-006","input":"How do I export my data?","expected":"Settings > Data > Export, delivered within 24h","tags":["account","edge"]}
