@@ -11,6 +11,11 @@ import { exact } from "./scorers/exact";
 import { sha256, gitSha, gitDirty } from "./config";
 import { saveRun } from "./store";
 import type { Database } from "bun:sqlite";
+import type { Scorer } from "./schema";
+import { contains } from "./scorers/contains";
+import { makeJudgeScorer } from "./scorers/judge";
+import { JUDGE_MODEL } from "./config";
+import { rubricHash } from "./judge/prompt";
 
 export type Target = (input: string) => Promise<string>;
 
@@ -40,15 +45,27 @@ export async function loadTarget(p: string): Promise<Target> {
   return fn as Target;
 }
 
+async function loadScorer(name: Scorer, db: Database): Promise<ScorerFn> {
+  switch (name) {
+    case "exact":
+      return exact;
+    case "contains":
+      return contains;
+    case "judge":
+      return makeJudgeScorer(db);
+  }
+}
+
 export interface RunOptions {
   db: Database;
   evalsetPath: string;
   targetPath: string;
+  scorer: Scorer;
 }
 export async function run(opts: RunOptions): Promise<RunRecord> {
   const cases = await loadEvalset(opts.evalsetPath);
   const target = await loadTarget(opts.targetPath);
-  const scorer: ScorerFn = exact;
+  const scorer = await loadScorer(opts.scorer, opts.db);
 
   const results: CaseResult[] = [];
   for (const c of cases) {
@@ -74,14 +91,16 @@ export async function run(opts: RunOptions): Promise<RunRecord> {
       reason: score.reason,
     });
   }
+
+  const isJudge = opts.scorer === "judge";
   const record: RunRecord = {
     timestamp: new Date().toISOString(),
     gitSha: await gitSha(),
     gitDirty: await gitDirty(),
     evalsetHash: sha256(JSON.stringify(cases)),
-    scorer: "exact",
-    judgeModel: null,
-    rubricHash: null,
+    scorer: opts.scorer,
+    judgeModel: isJudge ? JUDGE_MODEL : null,
+    rubricHash: isJudge ? rubricHash() : null,
     cases: results,
   };
 

@@ -8,7 +8,13 @@ export function printRun(record: RunRecord): void {
     console.log(`${icon} ${c.case.id}${tags}  ${c.reason}`);
   }
   const passed = record.cases.filter((c) => c.passed).length;
-  console.log(`\n${passed}/${record.cases.length} pass`);
+  const stats = tagStats(record.cases);
+  const parts: string[] = [];
+  for (const [tag, { pass, total }] of stats) {
+    parts.push(`${tag}: ${pass}/${total}`);
+  }
+  console.log(`\n${parts.join(" · ")}`);
+  console.log(`${passed}/${record.cases.length} pass`);
 }
 
 function tagStats(cases: CaseResult[]) {

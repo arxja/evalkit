@@ -1,0 +1,13 @@
+{"id":"a-001","input":"What is the refund policy?","expected":"30 days, no questions asked","actual":"Refunds are available within 30 days, no questions asked.","human_verdict":"pass","tags":["policy"]}
+{"id":"a-002","input":"What is the refund policy?","expected":"30 days, no questions asked","actual":"Refunds are available within 7 days.","human_verdict":"fail","tags":["policy"]}
+{"id":"a-003","input":"Can I cancel after 30 days?","expected":"No, but you can downgrade","actual":"You cannot cancel, but you can downgrade.","human_verdict":"pass","tags":["policy"]}
+{"id":"a-004","input":"Can I cancel after 30 days?","expected":"No, but you can downgrade","actual":"Yes, you can cancel anytime.","human_verdict":"fail","tags":["policy"]}
+{"id":"a-005","input":"How do I reset my password?","expected":"Click 'Forgot password' on the login page","actual":"Go to the login page and click 'Forgot password'.","human_verdict":"pass","tags":["account"]}
+{"id":"a-006","input":"How do I reset my password?","expected":"Click 'Forgot password' on the login page","actual":"Contact support.","human_verdict":"fail","tags":["account"]}
+{"id":"a-007","input":"What's the max file size?","expected":"5 GB per file","actual":"5 GB per file.","human_verdict":"pass","tags":["limits"]}
+{"id":"a-008","input":"What's the max file size?","expected":"5 GB per file","actual":"No size limit.","human_verdict":"fail","tags":["limits"]}
+{"id":"a-009","input":"How do I export my data?","expected":"Settings > Data > Export, delivered within 24h","actual":"Go to Settings > Data > Export, delivery takes up to 24 hours.","human_verdict":"pass","tags":["account"]}
+{"id":"a-010","input":"How do I export my data?","expected":"Settings > Data > Export, delivered within 24h","actual":"Go to Settings > Data > Export.","human_verdict":"fail","tags":["account"]}
+{"id":"a-011","input":"What is the refund policy?","expected":"30 days, no questions asked","actual":"You can get a refund within about a month, no questions asked.","human_verdict":"pass","tags":["policy"]}
+{"id":"a-012","input":"What is the refund policy?","expected":"30 days, no questions asked","actual":"Obviously 30 days. We're not going to bug you about it.","human_verdict":"pass","tags":["policy"]}
+{"id":"a-013","input":"How do I export my data?","expected":"Settings > Data > Export, delivered within 24h","actual":"Go to Settings > Data > Export. It should be ready within a day.","human_verdict":"pass","tags":["account"]}
